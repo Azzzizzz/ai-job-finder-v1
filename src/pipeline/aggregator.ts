@@ -75,12 +75,27 @@ export class Aggregator {
             const result = await Job.findOneAndUpdate(
               { $or: [{ url: job.url }, { urlHash: urlHash }] },
               {
-                ...job,
-                urlHash,
+                $set: {
+                  title: job.title,
+                  company: job.company,
+                  location: job.location,
+                  description: job.description,
+                  postedAt: job.postedAt,
+                  urlHash,
+                },
+                $addToSet: {
+                  sources: job.source,
+                  alternateUrls: job.url
+                },
                 // Don't overwrite existing scoring data if re-feeding
-                $setOnInsert: { processed: false, createdAt: new Date() }
+                $setOnInsert: { 
+                  url: job.url,
+                  source: job.source,
+                  processed: false, 
+                  createdAt: new Date() 
+                }
               },
-              { upsert: true, new: true, setDefaultsOnInsert: true }
+              { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
             );
             
             if (result) totalSaved++;

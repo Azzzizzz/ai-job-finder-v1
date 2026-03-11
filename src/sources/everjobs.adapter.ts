@@ -64,14 +64,31 @@ export class EverJobsAdapter extends BaseAdapter {
     try {
       if (!raw.jobUrl) return null;
       
+      let location = 'Remote';
+      if (raw.location) {
+        if (typeof raw.location === 'object') {
+          location = raw.location.city || raw.location.country || 'Remote';
+        } else {
+          location = raw.location;
+        }
+      }
+
+      let postedAt = new Date();
+      if (raw.datePosted) {
+        const parsedDate = new Date(raw.datePosted);
+        if (!isNaN(parsedDate.getTime())) {
+          postedAt = parsedDate;
+        }
+      }
+      
       return {
         title: raw.title || 'Untitled Role',
         company: raw.companyName || 'Unknown Company',
-        location: typeof raw.location === 'object' ? (raw.location.city || 'Remote') : (raw.location || 'Remote'),
+        location,
         description: raw.description || '',
         url: raw.jobUrl,
         source: `EverJobs (${raw.site || 'Aggregated'})`,
-        postedAt: raw.datePosted ? new Date(raw.datePosted) : new Date(),
+        postedAt,
       };
     } catch (err) {
       console.error('[EverJobsAdapter] Failed to parse job:', raw?.jobUrl, err);

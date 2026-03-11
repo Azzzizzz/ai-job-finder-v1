@@ -6,8 +6,10 @@ export interface IJob extends Document {
   location: string;
   description: string;
   url: string;
+  alternateUrls: string[];
   urlHash: string;
   source: string;
+  sources: string[];
   postedAt: Date;
   embedding?: number[];
   similarityScore?: number;
@@ -27,8 +29,10 @@ const JobSchema: Schema = new Schema({
   location: { type: String, required: true },
   description: { type: String, required: true },
   url: { type: String, required: true, unique: true },
+  alternateUrls: { type: [String], default: [] },
   urlHash: { type: String, required: true, index: true },
   source: { type: String, required: true },
+  sources: { type: [String], default: [] },
   postedAt: { type: Date, required: true },
   embedding: { type: [Number], select: false }, // Don't return by default
   similarityScore: { type: Number },

@@ -74,7 +74,7 @@ export class EmbeddingService {
         embedding, 
         updatedAt: new Date() 
       },
-      { upsert: true }
+      { upsert: true, returnDocument: 'after' }
     );
   }
 
