@@ -37,6 +37,7 @@ export class RemoteOKAdapter extends BaseAdapter {
       url: raw.url,
       source: this.name,
       postedAt: new Date(raw.date),
+      workMode: 'remote',
     };
   }
 }

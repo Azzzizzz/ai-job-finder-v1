@@ -31,7 +31,13 @@ export class EmailService {
     const jobRows = jobs.map((job, index) => `
       <div style="margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
         <h3 style="margin: 0; color: #1a73e8;">${index + 1}. ${job.title}</h3>
-        <p style="margin: 5px 0; font-weight: bold;">${job.company} | ${job.location} | Score: ${Math.round(job.finalScore * 100)}</p>
+        <p style="margin: 5px 0; font-weight: bold;">
+          ${job.company} | ${job.location} | 
+          <span style="color: ${job.workMode === 'remote' ? '#1e7e34' : job.workMode === 'hybrid' ? '#ffc107' : '#6c757d'};">
+            ${job.workMode.toUpperCase()}
+          </span> | 
+          Score: ${Math.round(job.finalScore * 100)}
+        </p>
         <p style="margin: 10px 0; color: #555;">${job.explanation?.summary || 'No summary available'}</p>
         <p style="margin: 10px 0;"><strong>Skills Overlap:</strong> ${job.explanation?.skillsOverlap?.join(', ') || 'N/A'}</p>
         <a href="${job.url}" style="display: inline-block; background: #1a73e8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 10px;">Apply Now</a>

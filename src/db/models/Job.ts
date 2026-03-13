@@ -14,6 +14,7 @@ export interface IJob extends Document {
   embedding?: number[];
   similarityScore?: number;
   finalScore?: number;
+  workMode: 'remote' | 'hybrid' | 'onsite';
   processed: boolean;
   explanation?: {
     summary: string;
@@ -37,6 +38,7 @@ const JobSchema: Schema = new Schema({
   embedding: { type: [Number], select: false }, // Don't return by default
   similarityScore: { type: Number },
   finalScore: { type: Number },
+  workMode: { type: String, enum: ['remote', 'hybrid', 'onsite'], required: true },
   processed: { type: Boolean, default: false },
   explanation: {
     summary: { type: String },

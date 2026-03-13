@@ -10,6 +10,7 @@ export interface NormalizedJob {
   url: string;
   source: string;
   postedAt: Date;
+  workMode: 'remote' | 'hybrid' | 'onsite';
 }
 
 export abstract class BaseAdapter {

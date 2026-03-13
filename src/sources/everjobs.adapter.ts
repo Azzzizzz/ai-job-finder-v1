@@ -92,14 +92,32 @@ export class EverJobsAdapter extends BaseAdapter {
         }
       }
       
+      const description = raw.description || '';
+      const title = raw.title || 'Untitled Role';
+
+      // 1. Work Mode Detection
+      let workMode: 'remote' | 'hybrid' | 'onsite' = 'onsite';
+      const isRemote = raw.isRemote === true || 
+                      location.toLowerCase().includes('remote') || 
+                      title.toLowerCase().includes('remote') ||
+                      description.toLowerCase().includes('remote');
+      
+      const isHybrid = title.toLowerCase().includes('hybrid') || 
+                      description.toLowerCase().includes('hybrid') ||
+                      location.toLowerCase().includes('hybrid');
+
+      if (isRemote) workMode = 'remote';
+      else if (isHybrid) workMode = 'hybrid';
+
       return {
-        title: raw.title || 'Untitled Role',
+        title,
         company: raw.companyName || 'Unknown Company',
         location,
-        description: raw.description || '',
+        description,
         url: raw.jobUrl,
-        source: `EverJobs (${raw.site || 'Aggregated'})`,
+        source: raw.site || 'everjobs',
         postedAt,
+        workMode
       };
     } catch (err) {
       console.error('[EverJobsAdapter] Failed to parse job:', raw?.jobUrl, err);

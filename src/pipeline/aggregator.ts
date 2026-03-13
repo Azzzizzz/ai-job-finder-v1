@@ -99,6 +99,7 @@ export class Aggregator {
                   location: job.location,
                   description: job.description,
                   postedAt: job.postedAt,
+                  workMode: job.workMode,
                   urlHash,
                 },
                 $addToSet: {

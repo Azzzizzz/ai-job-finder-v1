@@ -24,14 +24,26 @@ export class YCJobsAdapter extends BaseAdapter {
   parseJob(raw: RawJob): NormalizedJob | null {
     if (!raw.job_title || !raw.company_name || !raw.id) return null;
 
+    const location = raw.location || 'Remote/Unknown';
+    const description = raw.job_description || '';
+    const title = raw.job_title;
+
+    let workMode: 'remote' | 'hybrid' | 'onsite' = 'onsite';
+    if (location.toLowerCase().includes('remote') || description.toLowerCase().includes('remote') || title.toLowerCase().includes('remote')) {
+      workMode = 'remote';
+    } else if (location.toLowerCase().includes('hybrid') || description.toLowerCase().includes('hybrid') || title.toLowerCase().includes('hybrid')) {
+      workMode = 'hybrid';
+    }
+
     return {
-      title: raw.job_title,
+      title,
       company: raw.company_name,
-      location: raw.location || 'Remote/Unknown',
-      description: raw.job_description || '',
+      location,
+      description,
       url: `https://www.workatastartup.com/jobs/${raw.id}`,
       source: this.name,
       postedAt: raw.created_at ? new Date(raw.created_at) : new Date(),
+      workMode
     };
   }
 }

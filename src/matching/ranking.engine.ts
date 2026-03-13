@@ -59,16 +59,21 @@ export class RankingEngine {
       const isUS = jobLoc.includes('us') || jobLoc.includes('usa') || jobLoc.includes('united states');
       const isEurope = jobLoc.includes('europe') || jobLoc.includes('eu ') || jobLoc.includes('uk') || jobLoc.includes('germany') || jobLoc.includes('london');
       const isIndia = jobLoc.includes('india');
-      const isRemote = jobLoc.includes('remote') || searchableContext.includes('remote');
+      const isRemote = job.workMode === 'remote';
+      const isHybrid = job.workMode === 'hybrid';
       const isHyderabad = jobLoc.includes('hyderabad') || searchableContext.includes('hyderabad');
 
       if (isRemote) {
-        if (isUS) locationScore = 1.0; // 20 pts
+        if (isUS) locationScore = 1.0; // 20 pts (Premium US Remote)
         else if (isEurope) locationScore = 0.9; // 18 pts
         else if (isIndia) locationScore = 0.8; // 16 pts
-        else locationScore = 0.5; // 10 pts (Generic Remote)
+        else locationScore = 0.7; // 14 pts (Generic Global Remote)
+      } else if (isHybrid && isHyderabad) {
+        locationScore = 1.0; // Hybrid in your city is a perfect match
       } else if (isHyderabad) {
-        locationScore = 0.75; // 15 pts
+        locationScore = 0.85; // Local but unknown mode
+      } else if (isHybrid) {
+        locationScore = 0.4; // Hybrid but NOT in your city (Penalty)
       }
 
       // Geography Guard (Residency Penalty)

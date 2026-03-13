@@ -29,6 +29,7 @@ Unlike simple alert systems, this project doesn't just look for "Job Titles." It
 - **Semantic Matching**: Uses OpenAI’s `text-embedding-3-large` to calculate a "Similarity Score" (0.00 to 1.00) between your resume and a job's requirements.
 - **Noise Guard**: Automatically rejects roles that are clearly irrelevant (e.g., DevOps for a Backend dev) using deep-title analysis.
 - **Experience Enforcement**: Uses Regex pattern matching to identify "Years of Experience" required in a listing and skips jobs that don't fit your tier.
+- **Work Mode Tracking**: Explicitly identifies jobs as **Remote**, **Hybrid**, or **On-site**. This ensures you don't waste time on roles that require relocating if you aren't ready.
 - **Freshness Window**: Ensures you are only applying to active leads (default 7-day window).
 
 ### 🤖 AI Reasoning Layer
