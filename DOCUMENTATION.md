@@ -41,7 +41,36 @@ Unlike simple alert systems, this project doesn't just look for "Job Titles." It
 
 ---
 
-## 4. How It Works: Technical Architecture
+## 4. Live Examples: How It Works
+
+### Example A: The "Dream Company" Hunt
+**Goal**: You only want to work at Tier-1 companies like Google or Meta.
+- **Config**:
+  ```env
+  TARGET_COMPANIES=["Google", "Meta"]
+  TARGET_TITLES=["Senior Backend Engineer"]
+  ```
+- **Execution**: 
+  1. The system searches broadly for `"Senior Backend Engineer"` across all 160+ sources.
+  2. It finds 400+ jobs, but the **Aggregator** instantly discards 390 of them because the `company` field doesn't match Google or Meta.
+  3. You are left with a high-quality list of only the 10 roles at your target firms.
+
+### Example B: The "Broad Discovery" Search
+**Goal**: You are open to any company but want to focus on LinkedIn and RemoteOK to save time.
+- **Config**:
+  ```env
+  TARGET_COMPANIES=[] # Empty means search everyone
+  TARGET_SOURCES=["linkedin", "remoteok"]
+  TARGET_TITLES=["Node.js Developer", "Full Stack Engineer"]
+  ```
+- **Execution**:
+  1. The system performs two laser-focused scrapes exclusively on LinkedIn and RemoteOK.
+  2. It collects every matching role.
+  3. The **AI Intelligence Phase** then scores these jobs based on your resume, ranking a "Node.js" role at a small startup higher than a generic "Engineer" role because of your specific tech stack.
+
+---
+
+## 5. How It Works: Technical Architecture
 
 ### Phase 1: Aggregation (The Hunt)
 The system reads your `.env` for `TARGET_TITLES`. It then spawns the `EverJobsAdapter`, which runs automated CLI searches. 
