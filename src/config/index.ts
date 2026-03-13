@@ -23,6 +23,36 @@ export const config = {
     minSimilarityScore: parseFloat(process.env.MIN_SIMILARITY_SCORE || '0.75'),
     topJobsCount: parseInt(process.env.TOP_JOBS_COUNT || '15', 10),
     freshnessDays: parseInt(process.env.FRESHNESS_DAYS || '7', 10),
+    targetCompanies: (() => {
+      const val = process.env.TARGET_COMPANIES;
+      if (!val) return [];
+      try {
+        if (val.trim().startsWith('[') && val.trim().endsWith(']')) {
+          return JSON.parse(val);
+        }
+      } catch (e) {}
+      return val.split(',').map(c => c.trim()).filter(Boolean);
+    })(),
+    targetSources: (() => {
+      const val = process.env.TARGET_SOURCES;
+      if (!val) return [];
+      try {
+        if (val.trim().startsWith('[') && val.trim().endsWith(']')) {
+          return JSON.parse(val);
+        }
+      } catch (e) {}
+      return val.split(',').map(s => s.trim()).filter(Boolean);
+    })(),
+    targetTitles: (() => {
+      const val = process.env.TARGET_TITLES;
+      if (!val) return [];
+      try {
+        if (val.trim().startsWith('[') && val.trim().endsWith(']')) {
+          return JSON.parse(val);
+        }
+      } catch (e) {}
+      return val.split(',').map(t => t.trim()).filter(Boolean);
+    })(),
   },
 };
 

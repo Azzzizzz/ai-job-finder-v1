@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 import { BaseAdapter, RawJob, NormalizedJob } from './base.adapter';
+import { config } from '../config';
 
 const execAsync = promisify(exec);
 
@@ -23,16 +24,26 @@ export class EverJobsAdapter extends BaseAdapter {
     }
 
     const terms = Array.isArray(this.searchTerms) ? this.searchTerms : [this.searchTerms];
+    const companies = config.jobs.targetCompanies || [];
+    const targetSources = config.jobs.targetSources || [];
     const allJobs: RawJob[] = [];
 
-    for (const term of terms) {
-      // Searching ALL sites for this term
+    // Searching specified or ALL sites for this term
+    const effectiveQueries = terms;
+
+    const sourceFlags = targetSources.length > 0 ? targetSources.map((s: string) => `--site "${s}"`).join(' ') : '';
+    if (targetSources.length > 0) {
+      console.log(`[EverJobsAdapter] Targeting specific sources: ${targetSources.join(', ')}`);
+    }
+
+    for (const query of effectiveQueries) {
+      // Searching specified or ALL sites for this term
       // We keep --linkedin-fetch-description to ensure LinkedIn roles are high-quality
       // We use -n 5 per site to keep the result set manageable across 160+ sources
-      const command = `npx nest start cli -- search "${term}" -n 5 --linkedin-fetch-description --format json`;
+      const command = `npx nest start cli -- search "${query}" -n 5 ${sourceFlags} --linkedin-fetch-description --format json`;
       
       try {
-        console.log(`[EverJobsAdapter] Fetching from ALL resources for: ${term}`);
+        console.log(`[EverJobsAdapter] Fetching from ${targetSources.length > 0 ? 'specified' : 'ALL'} resources for: ${query}`);
         const { stdout } = await execAsync(command, { 
           cwd: cliPath,
           maxBuffer: 50 * 1024 * 1024 // Increased buffer for all-source search
@@ -45,14 +56,14 @@ export class EverJobsAdapter extends BaseAdapter {
           const jsonStr = stdout.substring(arrayStart, jsonEnd + 1);
           try {
             const jobs = JSON.parse(jsonStr);
-            console.log(`[EverJobsAdapter] Fetched ${jobs.length} raw jobs for "${term}" across all sites`);
+            console.log(`[EverJobsAdapter] Fetched ${jobs.length} raw jobs for "${query}" across all sites`);
             allJobs.push(...jobs);
           } catch (parseError) {
-            console.error(`[EverJobsAdapter] JSON parse error for "${term}":`, parseError);
+            console.error(`[EverJobsAdapter] JSON parse error for "${query}":`, parseError);
           }
         }
       } catch (error) {
-        console.error(`[EverJobsAdapter] CLI execution failed for "${term}":`, error);
+        console.error(`[EverJobsAdapter] CLI execution failed for "${query}":`, error);
       }
     }
 

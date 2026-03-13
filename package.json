@@ -10,6 +10,7 @@
     "update-profile": "ts-node src/cli/seed-profile.ts",
     "process-jobs": "ts-node src/cli/process-jobs.ts",
     "send-alerts": "ts-node src/cli/send-alerts.ts",
+    "daily-run": "ts-node src/cli/daily-run.ts",
     "test": "jest"
   },
   "keywords": [],

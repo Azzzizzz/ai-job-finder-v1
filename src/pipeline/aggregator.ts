@@ -7,10 +7,18 @@ import { Deduplicator } from './deduplicator';
 import { config } from '../config/index';
 
 export class Aggregator {
-  private async getAdapters(): Promise<BaseAdapter[]> {
-    const profile = await Profile.findOne();
-    const targetTitles = profile?.targetTitles?.length ? profile.targetTitles : ['Senior Backend Engineer'];
+  private async getTargetTitles(): Promise<string[]> {
+    let targetTitles = config.jobs.targetTitles || [];
     
+    if (targetTitles.length === 0) {
+      const profile = await Profile.findOne();
+      targetTitles = profile?.targetTitles?.length ? profile.targetTitles : ['Senior Backend Engineer'];
+    }
+    
+    return targetTitles;
+  }
+
+  private async getAdapters(targetTitles: string[]): Promise<BaseAdapter[]> {
     return [
       new EverJobsAdapter(targetTitles),
       new RemoteOKAdapter(),
@@ -39,8 +47,9 @@ export class Aggregator {
     return hasTechKeyword || matchesTarget;
   }
 
-  async run(): Promise<{ fetched: number; saved: number; errors: number }> {
-    const adapters = await this.getAdapters();
+  async run(): Promise<{ fetched: number; saved: number; totalInDB: number; errors: number }> {
+    const targetTitles = await this.getTargetTitles();
+    const adapters = await this.getAdapters(targetTitles);
     let totalFetched = 0;
     let totalSaved = 0;
     let totalErrors = 0;
@@ -54,9 +63,6 @@ export class Aggregator {
         const jobs = await adapter.getJobs();
         totalFetched += jobs.length;
 
-        const profile = await Profile.findOne();
-        const targetTitles = profile?.targetTitles || [];
-
         for (const job of jobs) {
           // 0. Relevance Filter (Noise Guard)
           if (!this.isRelevant(job.title, targetTitles)) {
@@ -64,7 +70,19 @@ export class Aggregator {
             continue;
           }
 
-          // 1. Freshness filter
+          // 1. Company Filter (Laser Focus)
+          if (config.jobs.targetCompanies && config.jobs.targetCompanies.length > 0) {
+            const matchesCompany = config.jobs.targetCompanies.some((target: string) => 
+              job.company.toLowerCase().includes(target.toLowerCase()) || 
+              target.toLowerCase().includes(job.company.toLowerCase())
+            );
+            if (!matchesCompany) {
+              // console.log(`[Aggregator] Skipping job from non-target company: ${job.company}`);
+              continue;
+            }
+          }
+
+          // 2. Freshness filter
           if (job.postedAt < cutoffDate) continue;
 
           // 2. Normalize and check for existing
@@ -112,6 +130,7 @@ export class Aggregator {
       }
     }
 
-    return { fetched: totalFetched, saved: totalSaved, errors: totalErrors };
+    const totalInDB = await Job.countDocuments();
+    return { fetched: totalFetched, saved: totalSaved, totalInDB, errors: totalErrors };
   }
 }

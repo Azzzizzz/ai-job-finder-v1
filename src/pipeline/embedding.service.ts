@@ -25,15 +25,21 @@ export class EmbeddingService {
     }
   }
 
-  async processJobs(): Promise<{ processed: number; errors: number }> {
-    const jobsToProcess = await Job.find({ 
+  async processJobs(limit: number = 0): Promise<{ processed: number; errors: number }> {
+    const query = Job.find({ 
       processed: false, 
       description: { $exists: true, $ne: '' },
       $or: [
         { embedding: { $exists: false } },
         { embedding: { $size: 0 } }
       ]
-    }).limit(100);
+    });
+
+    if (limit > 0) {
+      query.limit(limit);
+    }
+
+    const jobsToProcess = await query;
 
     let processedCount = 0;
     let errorCount = 0;
